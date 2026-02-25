@@ -76,6 +76,24 @@ _NON_COMPLIANT_NAME_FRAGMENTS: frozenset[str] = frozenset(
 _MUSAFFA_BASE_URL = "https://api.musaffa.com/v1"
 _DEFAULT_TIMEOUT = 10
 
+# Sectors / industries considered clean for sharia compliance
+_CLEAN_SECTORS: frozenset[str] = frozenset(
+    {
+        "technology",
+        "software",
+        "healthcare",
+        "pharmaceuticals",
+        "consumer electronics",
+        "semiconductors",
+        "retail",
+        "e-commerce",
+        "industrials",
+        "utilities",
+        "telecommunications",
+        "real estate",  # depends – mark doubtful by default; kept here as best-effort
+    }
+)
+
 
 class ShariaScreener:
     """Checks sharia compliance for a given stock ticker."""
@@ -171,20 +189,6 @@ class ShariaScreener:
 
         # Not enough information to confirm compliance; treat as doubtful
         # unless the sector is known-clean
-        _CLEAN_SECTORS = {
-            "technology",
-            "software",
-            "healthcare",
-            "pharmaceuticals",
-            "consumer electronics",
-            "semiconductors",
-            "retail",
-            "e-commerce",
-            "industrials",
-            "utilities",
-            "telecommunications",
-            "real estate",  # depends – mark doubtful
-        }
         for clean in _CLEAN_SECTORS:
             if clean in sector:
                 return "compliant"

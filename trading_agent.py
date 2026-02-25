@@ -33,6 +33,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Precision divisor for rounding order quantities to 4 decimal places
+_QUANTITY_PRECISION = 10_000
+
 Signal = Literal["BUY", "SELL", "HOLD"]
 
 
@@ -237,7 +240,7 @@ class TradingAgent:
         try:
             if signal == "BUY":
                 max_spend = available_cash * self._config.max_position_size
-                quantity = math.floor((max_spend / price) * 10000) / 10000
+                quantity = math.floor((max_spend / price) * _QUANTITY_PRECISION) / _QUANTITY_PRECISION
                 if quantity <= 0:
                     logger.warning(
                         "Insufficient cash to buy %s (available=%.2f)", ticker, available_cash
