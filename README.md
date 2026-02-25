@@ -4,6 +4,52 @@ A custom Python agent that monitors sharia-compliant stocks in real time using y
 
 ---
 
+## What Was Built
+
+This project is a fully autonomous **halal trading agent** written in Python. Here is exactly what it does and what each part is:
+
+### The problem it solves
+You want to trade only sharia-compliant (halal) stocks but doing so manually — checking compliance, watching prices, deciding when to buy/sell — is time-consuming. This agent automates the entire loop for you.
+
+### How it works end-to-end
+
+1. **You configure a watchlist** of stock tickers (e.g. `AAPL,MSFT,AMZN`) and point the agent at your Trading 212 account (demo or live) via an API key set in a `.env` file.
+
+2. **Every N seconds** (default: 60) the agent wakes up and, for each ticker in your list:
+   - Checks whether the stock is **sharia-compliant**. Non-compliant stocks (conventional banks, insurance, alcohol, tobacco, gambling, weapons, etc.) are silently skipped.
+   - Reads the latest price from Trading 212's instrument catalogue.
+   - Feeds the price into a **rolling price tracker** (last 20 prices) and generates one of three signals:
+     - `BUY` — if the price has dropped ≥ 2% below its recent high (dip-buying strategy).
+     - `SELL` — if the price has risen ≥ 3% above its recent low (take-profit strategy).
+     - `HOLD` — no action.
+
+3. **When a BUY or SELL signal fires**, the agent does one or both of the following depending on `AGENT_MODE`:
+   - **`auto`** — places a market order on Trading 212 immediately (buys up to 10% of available cash, sells the full held position).
+   - **`notify`** — sends a colour-coded rich embed to a Discord channel (green for BUY, red for SELL) with the ticker, price, quantity, reason, and whether it was auto-executed.
+   - **`both`** — executes the trade *and* sends the Discord message.
+
+### The five source files
+
+| File | What it is |
+|---|---|
+| `trading212_client.py` | Speaks to the Trading 212 REST API — reads account cash, portfolio positions, the full instruments catalogue, and places or cancels market/limit orders. |
+| `sharia_screener.py` | Decides whether a ticker is halal. Uses two layers: (1) a built-in list of excluded sectors/name keywords; (2) the optional [Musaffa API](https://musaffa.com) for a professionally rated halal/haram verdict. Falls back gracefully if the API is unavailable. |
+| `discord_notifier.py` | Sends formatted Discord messages via an Incoming Webhook. Covers buy signals, sell signals, general info messages, and error alerts. |
+| `trading_agent.py` | The main brain. Wires together the other modules. Contains the `PriceTracker` (rolling window), `SignalGenerator` (threshold logic), and `TradingAgent` (the monitoring loop). |
+| `config.py` | Reads all settings from environment variables (or a `.env` file). Nothing is hard-coded. |
+
+### What you need to use it
+- A **Trading 212 account** with an API key (free from Settings → API in the app). Start with the **demo** environment.
+- A **Discord webhook URL** if you want notifications (free — create one in any Discord server under Integrations → Webhooks).
+- Python 3.12+ and two libraries: `requests` and `python-dotenv`.
+
+### What it does NOT do (current limitations)
+- It does not use live streaming prices — it polls the Trading 212 instruments endpoint on a timer. True tick-by-tick streaming is not available through the current Trading 212 public API.
+- The buy/sell signal strategy is a simple momentum heuristic (% from rolling high/low). It is not a sophisticated quant model.
+- Sharia screening via built-in heuristics is a best-effort approximation. Always verify compliance with a qualified Islamic finance scholar.
+
+---
+
 ## Features
 
 | Feature | Detail |
