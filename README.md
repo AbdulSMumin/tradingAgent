@@ -59,6 +59,49 @@ You want to trade only sharia-compliant (halal) stocks but doing so manually —
 | 🤖 Auto-trading | Places market orders directly via Trading 212 REST API |
 | 💬 Discord notifications | Rich embeds sent to any Discord channel via webhook |
 | ⚙️ Flexible mode | `auto` (trade only), `notify` (Discord only), `both` |
+| 🖥️ Live terminal dashboard | `dashboard.py` renders a live Rich UI in your terminal |
+
+---
+
+## Visual Dashboard
+
+The agent is **not headless** — you can run it with a live terminal dashboard that updates every half-second:
+
+```bash
+python dashboard.py
+```
+
+The dashboard renders three panels:
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  🕌 Halal Trading Agent  │  Mode: NOTIFY  │  Env: DEMO          ║
+║  Cash: $1,234.56  │  Last tick: 14:32:01 UTC  │  Next in: 47s   ║
+╚══════════════════════════════════════════════════════════════════╝
+┌──────────── Watchlist ───────────────────────────────────────────┐
+│ Ticker  Halal  Price       High (20)   Low (20)  From High Signal│
+│ AAPL    ✅    $150.2300   $153.0000  $148.0000   -1.81%  HOLD   │
+│ MSFT    ✅    $375.5000   $380.0000  $370.0000   -1.18%  HOLD   │
+│ AMZN    ✅    $185.4000   $192.0000  $183.0000   -3.44%  🟢 BUY │
+└──────────────────────────────────────────────────────────────────┘
+┌──────────── Activity Log ────────────────────────────────────────┐
+│ [14:32:01] 🟢 AMZN: BUY @ $185.4000                             │
+│ [14:31:01] ✔ Tick #3 — 3 tickers checked                        │
+│ [14:30:01] 🚀 Halal Trading Agent started.                       │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Header panel** — agent mode, Trading 212 environment, available cash, time of last tick, and countdown to the next tick.
+
+**Watchlist table** — one row per ticker showing halal status (✅/❌/?), current price, 20-tick rolling high, 20-tick rolling low, percentage from the rolling high, and the last signal (🟢 BUY / 🔴 SELL / HOLD).
+
+**Activity log** — timestamped list of the 20 most recent events (signals fired, trades placed, agent start/stop).
+
+To run the plain headless version without the dashboard:
+
+```bash
+python trading_agent.py
+```
 
 ---
 
